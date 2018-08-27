@@ -11,3 +11,4 @@
 |
 */
 Route::get('stream/attachment/{time}/{file}/token/{token}', 'Restful\StorageController@downloadDocumentAttachment')->where(['time'=>'[0-9]+','file' => '[a-zA-Z0-9\.\-\_]+','token'=>'[a-zA-Z0-9\=]+']);
+Route::get('stream/preview/{id}/{name}','Restful\StorageController@downloadPreviewAttachment')->where(['id'=>'[0-9]+'],['name' => '[a-zA-Z0-9\-\_]+']);

@@ -161,6 +161,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         // App\Providers\GoogleDriveServiceProvider::class,
         App\Providers\GoogleDriveServiceProvider::class,
+        // Cviebrock\EloquentSluggable\ServiceProvider::class,
+        Cviebrock\EloquentSluggable\ServiceProvider::class,
 
     ],
 

@@ -10,6 +10,7 @@ class Document extends Model
     protected $table = 'documents';
     protected $guarded = [];
 
+
     protected static function getFileInfo($id, $name)
     {
         return Document::select('md5','extension','created_by')->where([

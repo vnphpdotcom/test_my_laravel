@@ -89,37 +89,5 @@ class DocumentController extends Controller
             return response()->json(['error' => true,'data'=>''],200);
         }
     }
-
-    function getStorage(Request $request)
-    {
-        if(Storage::exists($request->file))
-        {
-            return Storage::get($request->file);
-        }
-        else return response()->json(['error' => 'Not authorized'],403);
-    }
-
-
-    function getDownload(Request $request)
-    {
-        $file = $request->id.'.'.$request->type;
-        if(Storage::exists($file)&&Auth::check())
-        {
-            Ase::size(256);
-            $user = Auth::user();
-            $fileInfo = new \stdClass();
-            $fileInfo->type = $request->type;
-            $fileInfo->fileName = $request->id;
-            $fileInfo->size = Storage::size($file);
-            $fileInfo->lastModified = Storage::lastModified($file);
-            $fileInfo->lastRequested = time();
-            $token = $user->createToken(md5(time()))-> accessToken;
-            $fileInfo->token = $token;
-            $enc = Ase::enc(json_encode($fileInfo),'@@taiLIEUyHoc2011@@'.$request->header('User-Agent').$fileInfo->lastRequested);
-            $fileInfo->token = base64_encode($enc);
-            $fileInfo->asset = asset('api/v1.0/attachment/'.$fileInfo->lastRequested.'/'.$file);
-            return response()->json($fileInfo,200);
-        }
-        else return response()->json(['error' => 'Not authorized'],403);
-    }
+    
 }

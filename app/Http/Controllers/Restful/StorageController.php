@@ -18,18 +18,51 @@ class StorageController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    function getPreview(Request $request)
+    function getDocumentPreview(Request $request)
     {
-        $file = $request->id.'.'.$request->type;
-        if(Storage::exists($file)) {
-            $fileInfo = new \stdClass();
-            $fileInfo->type = $request->type;
-            $fileInfo->fileName = $request->id;
-            $fileInfo->size = Storage::size($file);
-            $fileInfo->lastModified = Storage::lastModified($file);
-            $fileInfo->asset = asset('api/v1.0/storage/' . $file);
+        $fileInfo = Document::getFileInfo($request->id,$request->name);
+        $filename = 'preview_'.$fileInfo->md5.'.'.$fileInfo->extension;
+        $fileInfo->lastRequested = time();
+        $fileInfo->fileslug = $request->name;
+        $fileInfo->fileid = $request->id;
+        $fileInfo->filename = 'preview_'.$request->name;
+        if(Storage::exists($filename)) {
             return response()->json($fileInfo, 200);
-        }else return response()->json(['error'=>'404 Not found'], 404);
+        }
+        else {
+            $cloud = collect(Storage::cloud()->listContents('/', true))->where('type', '=', 'file')
+                ->where('filename', '=', pathinfo($filename, PATHINFO_FILENAME))
+                ->where('extension', '=', pathinfo($filename, PATHINFO_EXTENSION))
+                ->first();
+            if ($cloud) {
+                return response()->json($fileInfo, 200);
+            } else return response()->json(['error' => '404 Not found'], 404);
+        }
+    }
+
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    function downloadPreviewAttachment(Request $request)
+    {
+        $fileInfo = Document::getFileInfo($request->id,$request->name);
+        $filename = 'preview_'.$fileInfo->md5.'.'.$fileInfo->extension;
+        $fileInfo->lastRequested = time();
+        $fileInfo->filename = 'preview_'.$request->name;
+        if(Storage::exists($filename)) {
+            return Storage::get($filename);
+        }
+        else {
+            $cloud = collect(Storage::cloud()->listContents('/', true))->where('type', '=', 'file')
+                ->where('filename', '=', pathinfo($filename, PATHINFO_FILENAME))
+                ->where('extension', '=', pathinfo($filename, PATHINFO_EXTENSION))
+                ->first();
+            if ($cloud) {
+                return Storage::cloud()->get($cloud['path']);
+            } else return response()->json(['error' => '404 Not found'], 404);
+        }
     }
 
     /**
